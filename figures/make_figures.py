@@ -156,7 +156,7 @@ ax.axhline(0, color=INK, lw=0.6)
 ferro_edge = np.degrees(np.arccos(4.5 / 52.5)) / 4
 ax.axvspan(0, ferro_edge, color=GRID, alpha=0.45, lw=0)
 ax.axvspan(90 - ferro_edge, 90, color=GRID, alpha=0.45, lw=0)
-ax.plot(th, A2, color=MUTED, lw=1.2, ls=(0, (4, 2)), label="$s=2$ (Ref. [8])")
+ax.plot(th, A2, color=MUTED, lw=1.2, ls=(0, (4, 2)), label="$s=2$ (inverse square)")
 ax.plot(th, A1, color=UP, lw=1.6, label="$s=1$ (Coulomb)")
 ax.scatter([0, 45, 90], [-1, 57 / 48, -1], s=14, color=UP, zorder=3)
 ax.text(45, 57 / 48 - 0.27, "$57/48$", ha="center", fontsize=7, color=INK)

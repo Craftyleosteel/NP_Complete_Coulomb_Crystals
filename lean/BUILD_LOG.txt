@@ -1,0 +1,23 @@
+Lean build log for the CoulombHardness development
+Built on Windows 11 (x86_64) with elan; repository commit shown below (before this log was added).
+
+== lake build ==
+Mon Nov 23 11:58:17 PST 2026
+leanprover/lean4:v4.36.0-rc2 (overridden by '\\?\C:\Users\pacon\Desktop\NP_Complete_Coloumb_Crystals\lean\lean-toolchain')
+Lean (version 4.36.0-rc2, x86_64-w64-windows-gnu, commit b35cb10cf2ced51a2fd1880cfdbf75c71ab7a35a, Release)
+
+c32ccca74dbfbcecd88b9960e280324b465b51da
+Build completed successfully (18194 jobs).
+
+real	35m56.370s
+user	0m0.000s
+sys	0m0.031s
+
+== sorry / admit scan of CoulombHardness/ and CoulombHardness.lean ==
+0 occurrences
+
+== #print axioms ==
+'CoulombHardness.GeometricReduction.correct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoulombHardness.barahona_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+Note: the build emitted only Mathlib module-system style warnings ("consider adding `module`"), one per file; no errors.

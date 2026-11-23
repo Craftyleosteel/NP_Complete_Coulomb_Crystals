@@ -5,6 +5,8 @@
 3. Rigorous-style bounds on the objective coefficient lambda (crude |A| <= 57 halo bound).
 4. Sensitivity of J and h to a perturbation eta of one selector's + diagonal, in units of
    b^3 r^-5 (for J) and b r^-3 (for h), to fix the constant in the perturbation lemma.
+5. Symbolic t^2 and t^4 coefficients of the perturbed h and J, as used in the proof of the
+   perturbation lemma.
 """
 import itertools
 import mpmath as mp
@@ -91,3 +93,43 @@ for R in [(1, 0), (1, 1), (2, 1), (1, 2), (3, 1), (4, 3), (7, 0), (5, 5)]:
     worstJ, worsth = max(worstJ, sJ), max(worsth, sh)
     print(f"   R={R}: |dJ| {mp.nstr(sJ, 5)}   |dh1| {mp.nstr(sh, 5)}")
 print(f"   max over samples: J {mp.nstr(worstJ, 5)}, h {mp.nstr(worsth, 5)}")
+
+# ---------- 5. symbolic perturbed coefficients (proof of the sensitivity lemma)
+# Stretch the + diagonals by (1 + e_i), (1 + e_j). The field has nonzero t^2 AND t^4 orders;
+# the t^4 order must be kept explicitly before the degree >= 5 remainder bound applies.
+ei, ej = sp.symbols("e_i e_j", real=True)
+s2 = sp.Symbol("s")  # s = sin 2 theta
+
+
+def Fpert(sig, tau):
+    P = lambda st, e: [((1 + e), (1 + e)), (-(1 + e), -(1 + e))] if st == 1 else [(1, -1), (-1, 1)]
+    tot = 0
+    for p in P(sig, ei):
+        for q in P(tau, ej):
+            v = (q[0] - p[0], q[1] - p[1])
+            z = 2 * t * (c * v[0] + sn * v[1]) + t**2 * (v[0] ** 2 + v[1] ** 2)
+            tot += sp.series((1 + z) ** sp.Rational(-1, 2), t, 0, 6).removeO()
+    return sp.expand(tot)
+
+
+Fp = {(a, b): Fpert(a, b) for a in (1, -1) for b in (1, -1)}
+hp = sp.expand((Fp[1, 1] + Fp[1, -1] - Fp[-1, 1] - Fp[-1, -1]) / 4)
+Jp = sp.expand((Fp[1, 1] - Fp[1, -1] - Fp[-1, 1] + Fp[-1, -1]) / 4)
+def check(label, expr, claimed):
+    """compare a trig coefficient with its claimed polynomial in s = sin 2 theta on a fine theta grid"""
+    f = sp.lambdify(th, expr, "mpmath")
+    g = sp.lambdify(s2, claimed, "mpmath")
+    err = max(abs(f(x) - g(mp.sin(2 * x))) for x in mp.linspace(0, 2 * mp.pi, 721))
+    print(f"   {label} = {claimed}   (max deviation {mp.nstr(err, 3)})")
+print("\n5. perturbed coefficients (s = sin 2 theta):")
+print("   odd orders vanish:", all(sp.simplify(X.coeff(t, k)) == 0 for X in (hp, Jp) for k in (1, 3, 5)))
+print("   J [t^2] =", sp.simplify(Jp.coeff(t, 2)))
+zero = {ei: 0, ej: 0}
+check("h [t^2] at e = 0", hp.coeff(t, 2).subs(zero), 6 * s2)
+check("d h[t^2]/de_i at e = 0", sp.diff(hp.coeff(t, 2), ei).subs(zero), 2 * (1 + 3 * s2))
+print("   d h[t^2]/de_j =", sp.simplify(sp.diff(hp.coeff(t, 2), ej)))
+h4 = hp.coeff(t, 4)
+check("h [t^4] at e = 0", h4.subs(zero), 20 * s2)
+check("d h[t^4]/de_i at e = 0", sp.diff(h4, ei).subs(zero), 35 * s2**2 + 25 * s2 - 4)
+check("d h[t^4]/de_j at e = 0", sp.diff(h4, ej).subs(zero), 105 * s2**2 + 15 * s2 - 48)
+check("d J[t^4]/de_i at e = 0", sp.diff(Jp.coeff(t, 4), ei).subs(zero), 105 * s2**2 + 15 * s2 - 48)
